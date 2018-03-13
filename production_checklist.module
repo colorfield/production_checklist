@@ -1,0 +1,296 @@
+<?php
+
+/**
+ * @file
+ * Contains production_checklist.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_help().
+ */
+function production_checklist_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the production_checklist module.
+    case 'help.page.production_checklist':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('A checklist for site launch and maintenance based on the active configuration.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_checklistapi_checklist_info().
+ */
+function production_checklist_checklistapi_checklist_info() {
+  // @todo add basic / extended filter
+  // @todo add launch / maintenance lists
+  // @todo uncheck and log once status has evolved
+  $productionChecklist = \Drupal::service('production_checklist');
+  $definitions = [];
+  $definitions['production_checklist'] = [
+    '#title' => t('Production Checklist'),
+    '#path' => 'admin/config/production_checklist/checklist',
+    '#description' => t('Production environment checklist. Happiness is in ticking boxes.'),
+    '#help' => t('<p>A checklist for site launch and maintenance based on the active configuration.</p>'),
+    // System check
+    // - Review project Dashboard
+    // - Review logs.
+    'drupal_system' => [
+      '#title' => t('Drupal system'),
+      '#description' => t('System wide status and reports.'),
+      'status_report' => [
+        '#title' => t('Review status report'),
+        '#description' => t('Contains general system information and errors /admin/reports/status'),
+      ],
+      'recent_logs' => [
+        '#title' => t('Review recent logs'),
+        // @todo add service for log errors based on a config threshold
+        '#description' => t('Contains general system information and errors /admin/reports/dblog'),
+      ],
+    ],
+    // Projects
+    // - Uninstall and remove unused modules
+    // - Uninstall and remove unused themes
+    // - Uninstall and remove development modules.
+    'drupal_codebase' => [
+      '#title' => t('Drupal code base'),
+      '#description' => t('Review contributed projects: core, modules and themes.'),
+      'unused_modules' => [
+        '#title' => t('Unused modules'),
+        '#description' => 'Uninstall and remove unused modules.',
+      ],
+      'unused_themes' => [
+        '#title' => t('Unused themes'),
+        '#description' => 'Uninstall and remove unused themes.',
+      ],
+      'development_modules' => [
+        '#title' => t('Development modules'),
+      // @todo add on service
+        '#description' => 'Disable development modules like devel, kint, webprofiler.',
+      ],
+    ],
+    // Codebase
+    // - Development vendors
+    // - Remove unused libraries
+    // - PHP Mess Detector.
+    'other_codebase' => [
+      '#title' => t('Other code base'),
+      '#description' => t("<p>Vendors, custom code and libraries</p>"),
+      'development_vendors' => [
+        '#title' => t('Remove development vendors like PHPUnit, Behat.'),
+    // @todo
+        '#description' => t('Run <code>composer install --no-dev</code>'),
+        'documentation' => [
+          '#text' => t('Composer documentation'),
+    // @todo
+          '#url' => Url::fromUri(t('https://composer.org')),
+        ],
+      ],
+      'custom_libraries' => [
+        '#title' => t('Remove unused libraries.'),
+        '#description' => t('Check the /libraries directory'),
+      ],
+    ],
+    // Spam prevention
+    // - User can create account
+    // - Check permissions for content creation
+    // - Check permissions for comment creation
+    // - Forms: contact form and webforms installed
+    // - Honeypot installed?
+    // - Recaptcha installed?
+    // - Email address harvesting.
+    'spam_prevention' => [
+      '#title' => t('Spam preventon'),
+      '#description' => t('Configuration and modules related to spam.'),
+      'user_registration' => [
+        '#title' => t('Review user registration'),
+        // @todo add service for current setting
+        '#description' => t('Depending on the use case, new account creations can be reserved to administrators.'),
+      ],
+      'content_permissions' => [
+        '#title' => t('Check permissions for <em>content</em> creation'),
+        '#description' => t('Node related permissions.'),
+      ],
+      'comment_permissions' => [
+        '#title' => t('Check permissions for <em>comment</em> creation'),
+        '#description' => 'Comment related permissions.',
+      ],
+      'forms' => [
+        '#title' => t('Check contact form and webform configuration'),
+        '#description' => t('Are the main contact form and personal contact form enabled? Is Webform installed?'),
+      ],
+      'antispam' => [
+        '#title' => t('Antispam modules'),
+        // @todo depend on forms settings
+        '#description' => t('Are the forms protected with Honeypot and reCaptcha?'),
+      ],
+      'email_obfuscation' => [
+        '#title' => t('Email obfuscation'),
+        // @todo depend on forms settings
+        '#description' => t('Are the email addresses protected against bots harvesting?'),
+      ],
+    ],
+    // Security and access control
+    // Test simultaneous and consequent anonymous access
+    // scenarios and behavior when every cache is enabled.
+    'security_access' => [
+      '#title' => t('Security and access'),
+      '#description' => t('This topic can be extended with @todo site audit, ...'),
+      'security_updates' => [
+        '#title' => t('Drupal and other projects update'),
+        // @todo add on service
+        '#description' => t('Are all the security updates applied?'),
+      ],
+      'permissions' => [
+        '#title' => t('Review the permissions'),
+        '#description' => t('This should be done for each role'),
+      ],
+    ],
+    // Content
+    // - Remove dummy content
+    // - Remove tests (webform, ...)
+    // - Remove unused content types
+    // - Remove unused vocabularies
+    // - Remove unused roles
+    // - Unused fields.
+    'content' => [
+      '#title' => t('Content'),
+      '#description' => t('Content model review and proofreading'),
+      'content_model' => [
+        '#title' => t('Review content model'),
+        '#description' => t('Remove unused content types, vocabularies, roles, fields, ...'),
+      ],
+      'dummy_content' => [
+        '#title' => t('Remove dummy content'),
+        '#description' => t('Content, terms, users, ... dedicated to site building (e.g. devel generate, ...) should not be there.'),
+      ],
+      'forms_test' => [
+        '#title' => t('Remove forms tests'),
+        '#description' => t('Webform provides a clear tests option @todo.'),
+      ],
+    ],
+    // Database
+    // - Database update
+    // - Entity update
+    // - Configuration export.
+    'database' => [
+      '#title' => t('Database'),
+      'db_update' => [
+        '#title' => t('Check database update'),
+        '#description' => t('Run /update.php'),
+      ],
+      'entity_update' => [
+        '#title' => t('Check entity update'),
+        '#description' => t('Run <code>drush entup</code>'),
+      ],
+      'configuration_export' => [
+        '#title' => t('Export current configuration'),
+        '#description' => t('Run <code>drush cex</code>'),
+      ],
+    ],
+    // Performance
+    // - BigPipe
+    // - Caching
+    // - CSS / JS aggregation
+    // - Varnish
+    // - Memcached.
+    'performance' => [
+      '#title' => t('Performance'),
+      '#description' => t('Performance and caching configuration.'),
+      'caching' => [
+        '#title' => t('Caching'),
+        '#description' => t('Are page caching and CSS/JS aggregation enabled? /admin/config/development/performance'),
+      ],
+    ],
+    'analytics' => [
+      '#title' => t('Analytics'),
+      '#description' => t('External tools to measure audience.'),
+      'google_analyics' => [
+        '#title' => t('Google Analytics'),
+        '#description' => t('Is Google Analytics installed and configured?'),
+      ],
+      'google_webmaster_tools' => [
+        '#title' => t('Google webmaster tools'),
+        '#description' => t('Are Google webmaster tools configured?'),
+      ],
+      'heatmap' => [
+        '#title' => t('Heatmap'),
+        '#description' => t('Is Hotjar or another heatmap installed and configured?'),
+      ],
+    ],
+    // Sysadmin check
+    // - Backups - Backup and migrate.
+    'sysadmin' => [
+      '#title' => t('Sysadmin and backups'),
+      '#description' => t('@todo'),
+      'backup' => [
+        '#title' => t('Backups'),
+        '#description' => t('Are backups enabled. E.g. Backup and Migrate, Nodesquirell'),
+      ],
+      'mail' => [
+        '#title' => t('Mails'),
+        '#description' => t('Have mails being tested for each form (e.g. password reset). Is a third party needed? Are SPF and PTR ok?'),
+      ],
+    ],
+    // Basic SEO.
+    'seo' => [
+      '#title' => t('SEO'),
+      '#description' => t('Basic SEO'),
+      'url_rewriting' => [
+        '#title' => t('URL rewriting'),
+        '#description' => t('Is URL rewriting enabled and Pathauto configured?'),
+      ],
+    ],
+    // Legal.
+    'legal' => [
+      '#title' => t('Legal'),
+      '#description' => t('Legal aspects'),
+      'cookie_control' => [
+        '#title' => t('Cookie control'),
+        '#description' => t('@todo'),
+      ],
+      'conditions' => [
+        '#title' => t('Privacy policy and general conditions'),
+        '#description' => t('@todo review commerce use case'),
+      ],
+      'gdpr' => [
+        '#title' => t('GDPR'),
+        '#description' => t('@todo gdpr module'),
+      ],
+    ],
+    // Project documentation
+    // - Developer onboarding
+    // - Author documentation.
+    'documentation' => [
+      '#title' => t('Project documentation'),
+      '#description' => t('@todo'),
+      'author_documentation' => [
+        '#title' => t('Author documentation'),
+        '#description' => t('@todo'),
+      ],
+      'developer_documentation' => [
+        '#title' => t('Developer onboarding'),
+        '#description' => t('@todo'),
+      ],
+    ],
+    // Tests.
+    // Go deeper with specialized modules or services
+    // use it in the context
+    // - SEO Checklist
+    // - Security Review Module
+    // - Performance and Scalability Checklist module
+    // - Site Audit module
+    // - Acquia Insight
+    // - YSlow
+    // - Google page speed
+    // - Profilers (XHProf, Blackfire)
+  ];
+
+  return $definitions;
+}

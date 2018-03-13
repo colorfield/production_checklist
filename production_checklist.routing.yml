@@ -1,0 +1,9 @@
+production_checklist.admin_config:
+  path: '/admin/config/production_checklist'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'Production Checklist'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE

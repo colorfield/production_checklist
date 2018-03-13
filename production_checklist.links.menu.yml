@@ -1,0 +1,5 @@
+production_checklist.checklist:
+  title: 'Production Checklist'
+  parent: system.admin_config_development
+  route_name: checklistapi.checklists.production_checklist
+  description: 'Production Checklist'
