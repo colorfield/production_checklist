@@ -38,9 +38,7 @@ function production_checklist_checklistapi_checklist_info() {
     '#path' => 'admin/config/production_checklist/checklist',
     '#description' => t('Production environment checklist. Happiness is in ticking boxes.'),
     '#help' => t('<p>A checklist for site launch and maintenance based on the active configuration.</p>'),
-    // System check
-    // - Review project Dashboard
-    // - Review logs.
+    // Drupal system check.
     'drupal_system' => [
       '#title' => t('Drupal system'),
       '#description' => t('System wide status and reports.'),
@@ -54,10 +52,7 @@ function production_checklist_checklistapi_checklist_info() {
         '#description' => t('Contains general system information and errors /admin/reports/dblog'),
       ],
     ],
-    // Projects
-    // - Uninstall and remove unused modules
-    // - Uninstall and remove unused themes
-    // - Uninstall and remove development modules.
+    // Drupal codebase.
     'drupal_codebase' => [
       '#title' => t('Drupal code base'),
       '#description' => t('Review contributed projects: core, modules and themes.'),
@@ -75,10 +70,7 @@ function production_checklist_checklistapi_checklist_info() {
         '#description' => 'Disable development modules like devel, kint, webprofiler.',
       ],
     ],
-    // Codebase
-    // - Development vendors
-    // - Remove unused libraries
-    // - PHP Mess Detector.
+    // Other codebase.
     'other_codebase' => [
       '#title' => t('Other code base'),
       '#description' => t("<p>Vendors, custom code and libraries</p>"),
@@ -93,18 +85,23 @@ function production_checklist_checklistapi_checklist_info() {
         ],
       ],
       'custom_libraries' => [
-        '#title' => t('Remove unused libraries.'),
+        '#title' => t('Remove unused libraries'),
         '#description' => t('Check the /libraries directory'),
       ],
+      'phpmd' => [
+        '#title' => t('PHP Mess Detector'),
+        '#description' => t('Run PHP Mess Detector on custom code.'),
+      ],
+      'phpcs' => [
+        '#title' => t('PHPCS'),
+        '#description' => t('Run PHP Coding Standards on custom code.'),
+      ],
+      'test' => [
+        '#title' => t('Testing'),
+        '#description' => t('Cover custom code base with BDD (Behat), PHPUnit, ... @todo references.'),
+      ],
     ],
-    // Spam prevention
-    // - User can create account
-    // - Check permissions for content creation
-    // - Check permissions for comment creation
-    // - Forms: contact form and webforms installed
-    // - Honeypot installed?
-    // - Recaptcha installed?
-    // - Email address harvesting.
+    // Spam prevention.
     'spam_prevention' => [
       '#title' => t('Spam preventon'),
       '#description' => t('Configuration and modules related to spam.'),
@@ -133,15 +130,13 @@ function production_checklist_checklistapi_checklist_info() {
       'email_obfuscation' => [
         '#title' => t('Email obfuscation'),
         // @todo depend on forms settings
-        '#description' => t('Are the email addresses protected against bots harvesting?'),
+        '#description' => t('Are the email addresses protected against bots harvesting? In fields, WYSIWYG, Twig.'),
       ],
     ],
-    // Security and access control
-    // Test simultaneous and consequent anonymous access
-    // scenarios and behavior when every cache is enabled.
+    // Security and access control.
     'security_access' => [
       '#title' => t('Security and access'),
-      '#description' => t('This topic can be extended with @todo site audit, ...'),
+      '#description' => t('This topic can be extended with Site Audit, Security Review @todo add other modules. Basically, test simultaneous and consequent anonymous access scenarios and behavior when every cache is enabled.'),
       'security_updates' => [
         '#title' => t('Drupal and other projects update'),
         // @todo add on service
@@ -151,14 +146,12 @@ function production_checklist_checklistapi_checklist_info() {
         '#title' => t('Review the permissions'),
         '#description' => t('This should be done for each role'),
       ],
+      'access_denied' => [
+        '#title' => t('Review access denied errors'),
+        '#description' => t('/admin/reports/access-denied if needed block IP addresses with. This process can be completed with the recent log messages'),
+      ],
     ],
-    // Content
-    // - Remove dummy content
-    // - Remove tests (webform, ...)
-    // - Remove unused content types
-    // - Remove unused vocabularies
-    // - Remove unused roles
-    // - Unused fields.
+    // Content model and content.
     'content' => [
       '#title' => t('Content'),
       '#description' => t('Content model review and proofreading'),
@@ -175,12 +168,9 @@ function production_checklist_checklistapi_checklist_info() {
         '#description' => t('Webform provides a clear tests option @todo.'),
       ],
     ],
-    // Database
-    // - Database update
-    // - Entity update
-    // - Configuration export.
+    // Database and configuration.
     'database' => [
-      '#title' => t('Database'),
+      '#title' => t('Database and configuration'),
       'db_update' => [
         '#title' => t('Check database update'),
         '#description' => t('Run /update.php'),
@@ -195,17 +185,18 @@ function production_checklist_checklistapi_checklist_info() {
       ],
     ],
     // Performance
-    // - BigPipe
-    // - Caching
-    // - CSS / JS aggregation
-    // - Varnish
-    // - Memcached.
+    // - @todo Varnish
+    // - @todo Memcached.
     'performance' => [
       '#title' => t('Performance'),
-      '#description' => t('Performance and caching configuration.'),
+      '#description' => t('Performance and caching configuration. To go deeper, consider Performance and Scalability Checklist.'),
       'caching' => [
         '#title' => t('Caching'),
         '#description' => t('Are page caching and CSS/JS aggregation enabled? /admin/config/development/performance'),
+      ],
+      'big_pipe' => [
+        '#title' => t('BigPipe'),
+        '#description' => t('Consider enabling the BigPipe module.'),
       ],
     ],
     'analytics' => [
@@ -224,8 +215,7 @@ function production_checklist_checklistapi_checklist_info() {
         '#description' => t('Is Hotjar or another heatmap installed and configured?'),
       ],
     ],
-    // Sysadmin check
-    // - Backups - Backup and migrate.
+    // Sysadmin check.
     'sysadmin' => [
       '#title' => t('Sysadmin and backups'),
       '#description' => t('@todo'),
@@ -241,10 +231,14 @@ function production_checklist_checklistapi_checklist_info() {
     // Basic SEO.
     'seo' => [
       '#title' => t('SEO'),
-      '#description' => t('Basic SEO'),
+      '#description' => t('Basic SEO. To go deeper, use SEO Checklist.'),
       'url_rewriting' => [
         '#title' => t('URL rewriting'),
         '#description' => t('Is URL rewriting enabled and Pathauto configured?'),
+      ],
+      'not_found' => [
+        '#title' => t('Review 404 errors'),
+        '#description' => t('/admin/reports/page-not-found then consider using the Redirect module'),
       ],
     ],
     // Legal.
@@ -264,9 +258,7 @@ function production_checklist_checklistapi_checklist_info() {
         '#description' => t('@todo gdpr module'),
       ],
     ],
-    // Project documentation
-    // - Developer onboarding
-    // - Author documentation.
+    // Project documentation.
     'documentation' => [
       '#title' => t('Project documentation'),
       '#description' => t('@todo'),
@@ -279,13 +271,8 @@ function production_checklist_checklistapi_checklist_info() {
         '#description' => t('@todo'),
       ],
     ],
-    // Tests.
     // Go deeper with specialized modules or services
     // use it in the context
-    // - SEO Checklist
-    // - Security Review Module
-    // - Performance and Scalability Checklist module
-    // - Site Audit module
     // - Acquia Insight
     // - YSlow
     // - Google page speed
