@@ -205,10 +205,10 @@ function production_checklist_checklistapi_checklist_info() {
     // Security and access control.
     'security_access' => [
       '#title' => t('Security and access'),
-      '#description' => t('This topic can be extended with @site_audit_link, @security_review_link @todo add other modules. Basically, test simultaneous and consequent anonymous access scenarios and behavior when every cache is enabled.',
+      '#description' => t('This topic can be extended with @site_audit_link and @security_review_link. Basically, test simultaneous and consequent anonymous access scenarios and behavior when every cache is enabled.',
        [
-         '@site_audit_link' => '@todo site audit',
-         '@security_review_link' => '@todo security review',
+         '@site_audit_link' => $productionChecklist->getProjectLink('site_audit'),
+         '@security_review_link' => $productionChecklist->getProjectLink('security_review'),
        ]
       ),
       'security_update' => [
@@ -271,7 +271,7 @@ function production_checklist_checklistapi_checklist_info() {
       ],
       'files' => [
         '#title' => t('Files sub directories'),
-        '#description' => t('Configure file and media fields for storing files in sub directories instead of /files.'),
+        '#description' => t('Configure file and media fields for storing files in sub directories instead of sites/default/files root.'),
       ],
     ],
     // Frontend.
@@ -296,15 +296,15 @@ function production_checklist_checklistapi_checklist_info() {
       '#title' => t('Database and configuration'),
       'db_update' => [
         '#title' => t('Check database update'),
-        '#description' => t('Run /update.php'),
+        '#description' => t('Run /update.php, get a backup first.'),
       ],
       'entity_update' => [
         '#title' => t('Check entity update'),
-        '#description' => t('Run <code>drush entup</code>'),
+        '#description' => t('Run <code>drush entup</code>.'),
       ],
       'configuration_export' => [
         '#title' => t('Export current configuration'),
-        '#description' => t('Run <code>drush cex</code>'),
+        '#description' => t('Run <code>drush cex</code>.'),
       ],
     ],
     // Performance
@@ -315,7 +315,11 @@ function production_checklist_checklistapi_checklist_info() {
       '#description' => t('Performance and caching configuration. To go deeper, consider Performance and Scalability Checklist.'),
       'caching' => [
         '#title' => t('Caching'),
-        '#description' => t('Are page caching and CSS/JS aggregation enabled? /admin/config/development/performance'),
+        '#description' => t('Are page caching and CSS/JS aggregation enabled?'),
+        'masquerade' => [
+          '#text' => t('Performance'),
+          '#url' => Url::fromUserInput(t('/admin/config/development/performance')),
+        ],
       ],
       'big_pipe' => [
         '#title' => t('BigPipe'),
@@ -325,7 +329,7 @@ function production_checklist_checklistapi_checklist_info() {
     ],
     'test' => [
       '#title' => t('Testing'),
-      '#description' => t('Test coverage with BDD (Behat), PHPUnit, ... @todo references.'),
+      '#description' => t('Test coverage with BDD (Behat), PHPUnit, ...'),
       'manual_test' => [
         '#title' => t('Manual test'),
         '#description' => t('Test the website for each role, anonymous included. Test with caches enabled. Use Masquerade to substitute as other users.'),
@@ -384,13 +388,21 @@ function production_checklist_checklistapi_checklist_info() {
       'ssl' => [
         '#title' => t('SSL certificate'),
         '#description' => t("Free SSL certificates are available from Let's Encrypt."),
+        'lets_encrypt' => [
+          '#text' => t("Let's Encrypt"),
+          '#url' => Url::fromUri('https://letsencrypt.org/'),
+        ],
       ],
       'max_upload' => [
         '#title' => t('Maximum file upload size'),
-        '#description' => t("This should be set in your per vhost php.ini configuration if available."),
+        '#description' => t("This should be set in your per vhost php.ini configuration if available. Set <code>post_max_size</code> and <code>upload_max_filesize</code> according to your needs."),
+      ],
+      'resources' => [
+        '#title' => t('Maximum memory and execution time'),
+        '#description' => t("This should be set in your per vhost php.ini configuration if available. Set <code>max_execution_time</code> and <code>memory_limit</code> according to your needs."),
       ],
       'file_permission' => [
-        '#title' => t('Check files/directorys permissions and ownership'),
+        '#title' => t('Check files / directories permissions and ownership'),
         '#description' => t('Usually one owner per virtual host, files at 644 and directories at 755.'),
       ],
       'cron_job' => [
@@ -410,7 +422,8 @@ function production_checklist_checklistapi_checklist_info() {
     // Basic SEO.
     'seo' => [
       '#title' => t('SEO'),
-      '#description' => t('Basic SEO. To go deeper, use SEO Checklist.'),
+      '#description' => t('Basic SEO. For an extended list, use @seo_checklist_link.',
+        ['@seo_checklist_link' => $productionChecklist->getProjectLink('seo_checklist')]),
       'url_rewriting' => [
         '#title' => t('URL rewriting'),
         '#description' => t('Is URL rewriting enabled and Pathauto configured?'),
