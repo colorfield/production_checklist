@@ -25,13 +25,31 @@ function production_checklist_help($route_name, RouteMatchInterface $route_match
 }
 
 /**
+ * Implements hook_theme().
+ */
+function production_checklist_theme() {
+  return [
+    'project_status_link' => [
+      // @todo preprocess hook
+      'variables' => [
+        'link' => NULL,
+        'status' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
  * Implements hook_checklistapi_checklist_info().
  */
 function production_checklist_checklistapi_checklist_info() {
-  // @todo add basic / extended filter
-  // @todo add launch / maintenance lists
+  // @todo add basic / extended checklist filter
+  // @todo add launch / maintenance checklist filter
   // @todo uncheck and log once status has evolved
   // @todo check Coder Review, Advagg
+  // @todo convert formUserInput into fromRoute
+
+  /** @var \Drupal\production_checklist\ProductionChecklistInterface $productionChecklist */
   $productionChecklist = \Drupal::service('production_checklist');
   $definitions = [];
   $definitions['production_checklist'] = [
@@ -54,6 +72,10 @@ function production_checklist_checklistapi_checklist_info() {
       'site_information' => [
         '#title' => t('Site information'),
         '#description' => t('Make sure the email address and site name are correct. Check the homepage title.'),
+        'path' => [
+          '#text' => t('Basic site settings'),
+          '#url' => Url::fromUserInput('/admin/config/system/site-information'),
+        ],
       ],
       'recent_logs' => [
         '#title' => t('Review recent logs'),
@@ -75,7 +97,6 @@ function production_checklist_checklistapi_checklist_info() {
       ],
       'core_search' => [
         '#title' => t('Core search'),
-        // @todo add service for log errors based on a config threshold
         '#description' => t('Disable core search if unused or if a replacement search is used (Search API, ...).'),
         'path' => [
           '#text' => t('Logging and errors'),
@@ -83,13 +104,10 @@ function production_checklist_checklistapi_checklist_info() {
         ],
       ],
       'syslog' => [
-        '#title' => t('Enable Syslog core module'),
-        // @todo add service for log errors based on a config threshold
+        '#title' => t('Enable Syslog core module and optionally disable Database Logging for performance.'),
         '#description' => t('Logs and records system events to syslog.'),
-        'path' => [
-          '#text' => t('Modules'),
-          '#url' => Url::fromUserInput('/admin/modules'),
-        ],
+        // @todo check modules status
+        'path' => $productionChecklist->getModulesPageTextUrl(),
       ],
     ],
     // Drupal codebase.
@@ -97,32 +115,22 @@ function production_checklist_checklistapi_checklist_info() {
       '#title' => t('Drupal code base'),
       '#description' => t('Review contributed projects: core, modules and themes.'),
       'development_modules' => [
-        '#title' => t('Development modules'),
-        // @todo add on service
-        '#description' => 'Disable development modules like devel, kint, webprofiler.',
-        'path' => [
-          '#text' => t('Uninstall modules'),
-          '#url' => Url::fromUserInput('/admin/modules/uninstall'),
-        ],
-        // 'status' => [
-        // '#text' =>
-        // render($productionChecklist->getDevelopmentModulesStatus()),
-        // ]
+        '#title' => t('Uninstall development modules'),
+        // @todo if all modules uninstalled, skip modules page link.
+        '#description' => $productionChecklist->getDevelopmentModulesStatusLink(),
+        'path' => $productionChecklist->getModulesUninstallPageTextUrl(),
       ],
       'unused_modules' => [
         '#title' => t('Unused modules'),
         '#description' => 'Uninstall and remove unused modules.',
-        'path' => [
-          '#text' => t('Uninstall modules'),
-          '#url' => Url::fromUserInput('/admin/modules/uninstall'),
-        ],
+        'path' => $productionChecklist->getModulesUninstallPageTextUrl(),
       ],
       'unused_themes' => [
         '#title' => t('Unused themes'),
         '#description' => 'Uninstall and remove unused themes.',
         'path' => [
           '#text' => t('Select and configure themes'),
-          '#url' => Url::fromUserInput('/admin/appearance'),
+          '#url' => Url::fromRoute('system.theme_install'),
         ],
       ],
     ],
@@ -132,32 +140,34 @@ function production_checklist_checklistapi_checklist_info() {
       '#description' => t("<p>Vendors, custom code and libraries</p>"),
       'development_vendors' => [
         '#title' => t('Remove development vendors like PHPUnit, Behat.'),
-    // @todo
         '#description' => t('Run <code>composer install --no-dev</code>'),
         'documentation' => [
-          '#text' => t('Composer documentation'),
-    // @todo review link
-          '#url' => Url::fromUri(t('https://composer.org')),
+          '#text' => t('Composer install documentation'),
+          '#url' => Url::fromUri(t('https://getcomposer.org/doc/03-cli.md#install')),
         ],
       ],
       'custom_libraries' => [
         '#title' => t('Remove unused libraries'),
         '#description' => t('Check the /libraries directory'),
       ],
+      'node_modules' => [
+        '#title' => t('Node modules'),
+        '#description' => t('Check if Node modules dedicated to SASS build, ... are not in the codebase.'),
+      ],
       'phpmd' => [
         '#title' => t('PHP Mess Detector'),
         '#description' => t('Run PHP Mess Detector on custom code.'),
         'documentation' => [
           '#text' => t('PHP Mess Detector'),
-          '#url' => Url::fromUri(t('https://@todo')),
+          '#url' => Url::fromUri(t('https://phpmd.org/')),
         ],
       ],
       'phpcs' => [
         '#title' => t('PHPCS'),
-        '#description' => t('Run PHP Coding Standards on custom code.'),
+        '#description' => t('Run the <code>phpcs</code> command on custom code.'),
         'documentation' => [
           '#text' => t('PHP Coding Standards'),
-          '#url' => Url::fromUri(t('https://@todo')),
+          '#url' => Url::fromUri(t('https://www.drupal.org/docs/develop/standards/coding-standards')),
         ],
       ],
     ],
@@ -183,20 +193,24 @@ function production_checklist_checklistapi_checklist_info() {
         '#description' => t('Are the main contact form and personal contact form enabled? Is Webform installed?'),
       ],
       'antispam' => [
-        '#title' => t('Antispam modules'),
+        '#title' => t('Are the forms protected with Honeypot and Captcha (and optionally reCaptcha)?'),
         // @todo depend on forms settings
-        '#description' => t('Are the forms protected with Honeypot and reCaptcha?'),
+        '#description' => $productionChecklist->getAntiSpamStatusLink(),
       ],
       'email_obfuscation' => [
         '#title' => t('Email obfuscation'),
-        // @todo depend on forms settings
         '#description' => t('Are the email addresses protected against bots harvesting? In fields, WYSIWYG, Twig.'),
       ],
     ],
     // Security and access control.
     'security_access' => [
       '#title' => t('Security and access'),
-      '#description' => t('This topic can be extended with Site Audit, Security Review @todo add other modules. Basically, test simultaneous and consequent anonymous access scenarios and behavior when every cache is enabled.'),
+      '#description' => t('This topic can be extended with @site_audit_link, @security_review_link @todo add other modules. Basically, test simultaneous and consequent anonymous access scenarios and behavior when every cache is enabled.',
+       [
+         '@site_audit_link' => '@todo site audit',
+         '@security_review_link' => '@todo security review',
+       ]
+      ),
       'security_update' => [
         '#title' => t('Drupal and other projects update'),
         // @todo add on service
@@ -222,13 +236,21 @@ function production_checklist_checklistapi_checklist_info() {
         '#title' => t('Review access denied errors'),
         '#description' => t('If needed block IP addresses with the core Ban module. This process can be completed with the recent log messages'),
         'path' => [
-          '#text' => t('/admin/reports/access-denied'),
+          '#text' => t('Top access denied errors'),
           '#url' => Url::fromUserInput('/admin/reports/access-denied'),
         ],
       ],
       'changelog' => [
         '#title' => t('Changelog'),
         '#description' => t('Do not publish CHANGELOG.txt'),
+      ],
+      'staging_local' => [
+        '#title' => t('Staging and dev environments'),
+        '#description' => t('Make sure that your staging and dev environments does not contain sensitive data.'),
+        'documentation' => [
+          '#text' => t('Securing Non-Production Environments'),
+          '#url' => Url::fromUri('https://dev.acquia.com/blog/securing-nonproduction-environments/09/03/2018/19251'),
+        ],
       ],
     ],
     // Content model and content.
@@ -245,7 +267,11 @@ function production_checklist_checklistapi_checklist_info() {
       ],
       'forms_test' => [
         '#title' => t('Remove forms tests'),
-        '#description' => t('Webform provides a clear tests option @todo.'),
+        '#description' => t('Webform provides a test deletion tab for each webform.'),
+      ],
+      'files' => [
+        '#title' => t('Files sub directories'),
+        '#description' => t('Configure file and media fields for storing files in sub directories instead of /files.'),
       ],
     ],
     // Frontend.
@@ -294,10 +320,7 @@ function production_checklist_checklistapi_checklist_info() {
       'big_pipe' => [
         '#title' => t('BigPipe'),
         '#description' => t('Consider enabling the BigPipe module.'),
-        'path' => [
-          '#text' => t('Modules'),
-          '#url' => Url::fromUserInput('/admin/modules'),
-        ],
+        'path' => $productionChecklist->getModulesPageTextUrl(),
       ],
     ],
     'test' => [
@@ -315,13 +338,13 @@ function production_checklist_checklistapi_checklist_info() {
         '#title' => t('Run Behat tests'),
         '#description' => t('@todo'),
         '#text' => t('Behat'),
-        '#url' => Url::fromUri(t('https://@todo')),
+        '#url' => Url::fromUri(t('http://behat-drupal-extension.readthedocs.io/en/3.1/intro.html')),
       ],
       'php_unit' => [
         '#title' => t('Run PHPUnit tests'),
         '#description' => t('@todo'),
         '#text' => t('PHP Unit'),
-        '#url' => Url::fromUri(t('https://@todo')),
+        '#url' => Url::fromUri(t('https://www.drupal.org/docs/8/phpunit')),
       ],
     ],
     'analytics' => [
@@ -342,7 +365,7 @@ function production_checklist_checklistapi_checklist_info() {
         '#description' => t('Is Hotjar or another heatmap installed and configured?'),
         'hotjar' => [
           '#text' => t('Hotjar'),
-          '#url' => Url::fromUri('https://@todo'),
+          '#url' => Url::fromUri('https://www.hotjar.com/'),
         ],
       ],
     ],
@@ -430,8 +453,12 @@ function production_checklist_checklistapi_checklist_info() {
       '#title' => t('Legal'),
       '#description' => t('Legal aspects'),
       'cookie_control' => [
-        '#title' => t('Cookie control'),
+        '#title' => t('Cookie compliance with regulations'),
         '#description' => t('@todo'),
+        'project' => [
+          '#text' => t('Cookie control module'),
+          '#url' => Url::fromUri('https://www.drupal.org/project/cookiecontrol'),
+        ],
       ],
       'conditions' => [
         '#title' => t('Privacy policy and general conditions'),
@@ -440,7 +467,7 @@ function production_checklist_checklistapi_checklist_info() {
       'gdpr' => [
         '#title' => t('GDPR'),
         '#description' => t('Check compliance with the General Data Protection Regulation.'),
-        'gdpr' => [
+        'project' => [
           '#text' => t('GDPR module'),
           '#url' => Url::fromUri('https://drupal.org/project/gdpr'),
         ],

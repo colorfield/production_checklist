@@ -5,6 +5,9 @@ namespace Drupal\production_checklist;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandler;
 use Drupal\Core\Config\ConfigFactory;
+use Drupal\Core\Link;
+use Drupal\Core\Render\Renderer;
+use Drupal\Core\Url;
 
 /**
  * Class ProductionChecklist.
@@ -26,6 +29,13 @@ class ProductionChecklist implements ProductionChecklistInterface {
   protected $moduleHandler;
 
   /**
+   * Drupal\Core\Render\Renderer definition.
+   *
+   * @var \Drupal\Core\Render\Renderer
+   */
+  protected $renderer;
+
+  /**
    * Drupal\Core\Config\ConfigFactory definition.
    *
    * @var \Drupal\Core\Config\ConfigFactory
@@ -35,45 +45,85 @@ class ProductionChecklist implements ProductionChecklistInterface {
   /**
    * Constructs a new ProductionChecklist object.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ModuleHandler $module_handler, ConfigFactory $config) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ModuleHandler $module_handler, Renderer $renderer, ConfigFactory $config) {
     $this->entityTypeManager = $entity_type_manager;
     $this->moduleHandler = $module_handler;
+    $this->renderer = $renderer;
     $this->config = $config;
   }
 
   /**
-   * Wrapper for the module handler to check if a module is installed.
-   *
-   * @param string $module
-   *   Module machine name.
-   *
-   * @return bool
-   *   Is the module installed.
+   * {@inheritdoc}
    */
   public function isModuleInstalled($module) {
     return $this->moduleHandler->moduleExists($module);
   }
 
   /**
-   * Returns a summary of spam prevention needed depending on the configuration.
-   *
-   * @return array
-   *   Anti spam summary render array.
+   * {@inheritdoc}
    */
-  public function getAntiSpamStatus() {
-    // @todo
-    $build = [];
-    return $build;
+  public function getProjectLink($project) {
+    $uri = 'https://drupal.org/project/' . $project;
+    $projectName = str_replace('_', ' ', $project);
+    $projectName = ucwords($projectName);
+    $url = Url::fromUri($uri);
+    $link = Link::fromTextAndUrl($projectName, $url);
+    $link = $link->toRenderable();
+    return $this->renderer->render($link);
   }
 
   /**
-   * Returns the available updates for an update type.
-   *
-   * @param string $type
-   *   Update type.
-   *
-   * @return array
-   *   Available updates summary render array.
+   * {@inheritdoc}
+   */
+  public function getProjectStatusLink($project, $should_install = TRUE) {
+    // @todo improve UI, with should install hint.
+    $status = t('Is *not* installed');
+    // @todo check if the project is a module, a theme or a distro.
+    if ($this->isModuleInstalled($project)) {
+      $status = t('Is installed');
+    }
+    $build = [
+      '#theme' => 'project_status_link',
+      '#link' => $this->getProjectLink($project),
+      '#status' => $status,
+    ];
+    return $this->renderer->render($build);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getProjectsListStatusLink(array $projects, $should_install = TRUE) {
+    $items = [];
+    foreach ($projects as $project) {
+      $items[] = $this->getProjectStatusLink($project, $should_install);
+    }
+    $build['status-link-list'] = [
+      '#theme' => 'item_list',
+      '#items' => $items,
+      '#type' => 'ul',
+    ];
+    return $this->renderer->render($build);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAntiSpamStatusLink() {
+    $projects = ['honeypot', 'captcha', 'recaptcha'];
+    return $this->getProjectsListStatusLink($projects);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDevelopmentModulesStatusLink() {
+    $projects = ['devel', 'devel_generate', 'webprofiler', 'kint', 'coder'];
+    return $this->getProjectsListStatusLink($projects, FALSE);
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function availableUpdates($type = 'security') {
     $build = [];
@@ -82,22 +132,37 @@ class ProductionChecklist implements ProductionChecklistInterface {
       $this->moduleHandler->loadInclude('update', 'compare.inc');
       $build['#data'] = update_calculate_project_data($available);
     }
-    return $build;
+    return $this->renderer->render($build);
   }
 
   /**
-   * Returns a summary of installation status for development modules.
-   *
-   * @return array
-   *   Development modules summary.
+   * {@inheritdoc}
    */
-  public function getDevelopmentModulesStatus() {
-    // Webprofiler
-    // Devel
-    // Coder
-    // ...
-    $build = [];
-    return $build;
+  public function getModulesPageLink() {
+    $route = 'system.modules_list';
+    $link = Link::createFromRoute(t('Modules'), $route);
+    $link = $link->toRenderable();
+    return $this->renderer->render($link);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getModulesPageTextUrl() {
+    return [
+      '#text' => t('Modules'),
+      '#url' => Url::fromRoute('system.modules_list'),
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getModulesUninstallPageTextUrl() {
+    return [
+      '#text' => t('Uninstall modules'),
+      '#url' => Url::fromRoute('system.modules_uninstall'),
+    ];
   }
 
 }
