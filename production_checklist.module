@@ -56,11 +56,11 @@ function production_checklist_checklistapi_checklist_info() {
     '#title' => t('Production Checklist'),
     '#path' => 'admin/config/production_checklist/checklist',
     '#description' => t('Production environment checklist. Happiness is in ticking boxes.'),
-    '#help' => t('<p>A checklist for site launch and maintenance based on the active configuration.</p>'),
+    '#help' => '<p>' . t('A checklist for site launch and maintenance based on the active configuration.') . '</p>',
     // Drupal system check.
     'drupal_system' => [
       '#title' => t('Drupal system'),
-      '#description' => t('System wide status and reports.'),
+      '#description' => '<h2>' . t('System wide status and reports') . '</h2>',
       'status_report' => [
         '#title' => t('Review status report'),
         '#description' => t('Contains general system information.'),
@@ -97,11 +97,8 @@ function production_checklist_checklistapi_checklist_info() {
       ],
       'core_search' => [
         '#title' => t('Core search'),
-        '#description' => t('Disable core search if unused or if a replacement search is used (Search API, ...).'),
-        'path' => [
-          '#text' => t('Logging and errors'),
-          '#url' => Url::fromUserInput('/admin/config/development/logging'),
-        ],
+        '#description' => t('Disable core search if not relevant or if a replacement search is used (Search API, ...).'),
+        'path' => $productionChecklist->getModulesPageTextUrl(),
       ],
       'syslog' => [
         '#title' => t('Enable Syslog core module and optionally disable Database Logging for performance.'),
@@ -113,10 +110,10 @@ function production_checklist_checklistapi_checklist_info() {
     // Drupal codebase.
     'drupal_codebase' => [
       '#title' => t('Drupal code base'),
-      '#description' => t('Review contributed projects: core, modules and themes.'),
+      '#description' => '<h2>' . t('Contributed projects review') . '</h2><p>' . t('Core, modules and themes.') . '</p>',
       'development_modules' => [
-        '#title' => t('Uninstall development modules'),
-        // @todo if all modules uninstalled, skip modules page link.
+        '#title' => t('Uninstall development modules like Devel (Devel, Devel generate, Kint, Webprofiler).'),
+        // @todo check modules status
         '#description' => $productionChecklist->getDevelopmentModulesStatusLink(),
         'path' => $productionChecklist->getModulesUninstallPageTextUrl(),
       ],
@@ -129,15 +126,15 @@ function production_checklist_checklistapi_checklist_info() {
         '#title' => t('Unused themes'),
         '#description' => 'Uninstall and remove unused themes.',
         'path' => [
-          '#text' => t('Select and configure themes'),
-          '#url' => Url::fromRoute('system.theme_install'),
+          '#text' => t('Appearance'),
+          '#url' => Url::fromRoute('system.themes_page'),
         ],
       ],
     ],
     // Other codebase.
     'other_codebase' => [
       '#title' => t('Other code base'),
-      '#description' => t("<p>Vendors, custom code and libraries</p>"),
+      '#description' => '<h2>' . t("Vendors, custom code and libraries") . '</h2>',
       'development_vendors' => [
         '#title' => t('Remove development vendors like PHPUnit, Behat.'),
         '#description' => t('Run <code>composer install --no-dev</code>'),
@@ -147,7 +144,7 @@ function production_checklist_checklistapi_checklist_info() {
         ],
       ],
       'custom_libraries' => [
-        '#title' => t('Remove unused libraries'),
+        '#title' => t('Remove unused libraries.'),
         '#description' => t('Check the /libraries directory'),
       ],
       'node_modules' => [
@@ -174,11 +171,11 @@ function production_checklist_checklistapi_checklist_info() {
     // Spam prevention.
     'spam_prevention' => [
       '#title' => t('Spam prevention'),
-      '#description' => t('Configuration and modules related to spam.'),
+      '#description' => '<h2>' . t('Spam related configuration and modules') . '</h2>',
       'user_registration' => [
         '#title' => t('Review user registration'),
         // @todo add service for current setting
-        '#description' => t('Depending on the use case, new account creations can be reserved to administrators.'),
+        '#description' => t('Depending on the use case, new account creations can be limited to administrators.'),
       ],
       'content_permissions' => [
         '#title' => t('Check permissions for <em>content</em> creation'),
@@ -205,28 +202,40 @@ function production_checklist_checklistapi_checklist_info() {
     // Security and access control.
     'security_access' => [
       '#title' => t('Security and access'),
-      '#description' => t('This topic can be extended with @site_audit_link and @security_review_link. Basically, test simultaneous and consequent anonymous access scenarios and behavior when every cache is enabled.',
+      '#description' => '<h2>' . t('Security and access control') . '</h2><p>' . t('This topic can be extended with @site_audit_link and @security_review_link. Basically, test simultaneous and consequent anonymous access scenarios and behavior when every cache is enabled.',
        [
          '@site_audit_link' => $productionChecklist->getProjectLink('site_audit'),
          '@security_review_link' => $productionChecklist->getProjectLink('security_review'),
        ]
-      ),
+      ) . '</p>',
       'security_update' => [
         '#title' => t('Drupal and other projects update'),
         // @todo add on service
         '#description' => t('Are all the security updates applied?'),
+        'path' => [
+          '#text' => t('Available updates'),
+          '#url' => Url::fromUserInput('/admin/reports/updates'),
+        ],
       ],
       'permission' => [
         '#title' => t('Review the permissions'),
         '#description' => t('This should be done for each role.'),
+        'path' => [
+          '#text' => t('Permissions'),
+          '#url' => Url::fromUserInput('/admin/people/permissions'),
+        ],
       ],
       'input_format' => [
         '#title' => t('Input format'),
         '#description' => t('Make sure that input formats are correctly configured. <em>Full HTML</em> should be avoided for untrusted users.'),
+        'path' => [
+          '#text' => t('Text formats and editors'),
+          '#url' => Url::fromUserInput('/admin/config/content/formats'),
+        ],
       ],
       'password' => [
         '#title' => t('Check passwords'),
-        '#description' => t('Depending on the role, passwords should be hard to guess. Use a module like Password Policy.'),
+        '#description' => t('Passwords should be hard to guess, especially for author and admin roles. Use a module like Password Policy.'),
         'password_policy' => [
           '#text' => t('Password Policy'),
           '#url' => Url::fromUri('https://www.drupal.org/project/password_policy'),
@@ -234,7 +243,7 @@ function production_checklist_checklistapi_checklist_info() {
       ],
       'access_denied' => [
         '#title' => t('Review access denied errors'),
-        '#description' => t('If needed block IP addresses with the core Ban module. This process can be completed with the recent log messages'),
+        '#description' => t('If needed block IP addresses with the core Ban module. This process can be completed with the recent log messages.'),
         'path' => [
           '#text' => t('Top access denied errors'),
           '#url' => Url::fromUserInput('/admin/reports/access-denied'),
@@ -242,11 +251,13 @@ function production_checklist_checklistapi_checklist_info() {
       ],
       'changelog' => [
         '#title' => t('Changelog'),
-        '#description' => t('Do not publish CHANGELOG.txt'),
+        '#description' => t('Do not publish CHANGELOG.txt and other .txt files at the root of the code base.'),
       ],
       'staging_local' => [
         '#title' => t('Staging and dev environments'),
-        '#description' => t('Make sure that your staging and dev environments does not contain sensitive data.'),
+        '#description' => t('Make sure that your staging and dev environments does not contain sensitive data and are protected with @shield_link if accessible from the outside.', [
+          '@shield_link' => $productionChecklist->getProjectLink('shield'),
+        ]),
         'documentation' => [
           '#text' => t('Securing Non-Production Environments'),
           '#url' => Url::fromUri('https://dev.acquia.com/blog/securing-nonproduction-environments/09/03/2018/19251'),
@@ -256,14 +267,18 @@ function production_checklist_checklistapi_checklist_info() {
     // Content model and content.
     'content' => [
       '#title' => t('Content'),
-      '#description' => t('Content model review and proofreading'),
+      '#description' => '<h2>' . t('Content model review and proofreading') . '</h2>',
       'content_model' => [
         '#title' => t('Review content model'),
         '#description' => t('Remove unused content types, vocabularies, roles, fields, ...'),
       ],
       'dummy_content' => [
         '#title' => t('Remove dummy content'),
-        '#description' => t('Content, terms, users, ... dedicated to site building (e.g. devel generate, ...) should not be there.'),
+        '#description' => t('Content, terms, users, ... dedicated to site building (e.g. devel generated) should not be there.'),
+      ],
+      'proofreading' => [
+        '#title' => t('Proofreading'),
+        '#description' => t('Content proofreading.'),
       ],
       'forms_test' => [
         '#title' => t('Remove forms tests'),
@@ -271,29 +286,34 @@ function production_checklist_checklistapi_checklist_info() {
       ],
       'files' => [
         '#title' => t('Files sub directories'),
-        '#description' => t('Configure file and media fields for storing files in sub directories instead of sites/default/files root.'),
+        '#description' => t('Configure file and media fields for storing files in sub directories instead of the <em>sites/default/files</em> root.'),
       ],
     ],
     // Frontend.
     'frontend' => [
       '#title' => t('Frontend'),
-      '#description' => t('Frontend minimal requirements'),
+      '#description' => '<h2>' . t('Frontend basic checks') . '</h2>',
       'maintenance_page' => [
         '#title' => t('Provide a maintenance page'),
-        '#description' => t('@todo'),
+        '#description' => t('Check the maintenance page layout.'),
       ],
       'not_found' => [
-        '#title' => t('Provide a 404 page'),
-        '#description' => t('@todo'),
+        '#title' => t('Provide a good 404 page'),
+        '#description' => t('Check the 404 page layout. Optionally provide a dedicated design and improve it (smart 404, search engine, ...).'),
+      ],
+      'access_denied' => [
+        '#title' => t('Provide a good 403 page'),
+        '#description' => t('Check the 403 page layout. Provide options to login and redirect to the accessed route.'),
       ],
       'favicon' => [
         '#title' => t('Favicon'),
-        '#description' => t('@todo.'),
+        '#description' => t('Provide favicons in several formats.'),
       ],
     ],
     // Database and configuration.
     'database' => [
-      '#title' => t('Database and configuration'),
+      '#title' => t('Database'),
+      '#description' => '<h2>' . t('Database and configuration') . '</h2>',
       'db_update' => [
         '#title' => t('Check database update'),
         '#description' => t('Run /update.php, get a backup first.'),
@@ -307,12 +327,15 @@ function production_checklist_checklistapi_checklist_info() {
         '#description' => t('Run <code>drush cex</code>.'),
       ],
     ],
-    // Performance
-    // - @todo Varnish
-    // - @todo Memcached.
+    // Performance.
     'performance' => [
       '#title' => t('Performance'),
-      '#description' => t('Performance and caching configuration. To go deeper, consider Performance and Scalability Checklist.'),
+      '#description' => '<h2>' . t('Performance and caching configuration') . '</h2><p>' . t('To go deeper, consider using @varnish_link, @memcached_link, @advagg_link.',
+          [
+            '@varnish_link' => $productionChecklist->getProjectLink('varnish_purge'),
+            '@memcached_link' => $productionChecklist->getProjectLink('memcache'),
+            '@advagg_link' => $productionChecklist->getProjectLink('advagg'),
+          ]) . '</p>',
       'caching' => [
         '#title' => t('Caching'),
         '#description' => t('Are page caching and CSS/JS aggregation enabled?'),
@@ -326,39 +349,88 @@ function production_checklist_checklistapi_checklist_info() {
         '#description' => t('Consider enabling the BigPipe module.'),
         'path' => $productionChecklist->getModulesPageTextUrl(),
       ],
+      // @todo improve
+      'views' => [
+        '#title' => t('Views'),
+        '#description' => t('Checks views caching (on a View edit: Advanced > Other > Caching).'),
+      ],
+      'custom_code' => [
+        '#title' => t('Custom code'),
+        '#description' => t('Check cache tags and invalidation, make use of Drupal cache for heavy tasks.'),
+      ],
+      'audit' => [
+        '#title' => t('Audit performances'),
+        '#description' => t('Use tools like Google PageSpeed Insight or Acquia Insight.'),
+        'google_page_speed' => [
+          '#text' => 'Google PageSpeed Insights',
+          '#url' => Url::fromUri('https://developers.google.com/speed/pagespeed/insights/'),
+        ],
+        'acquia_insight' => [
+          '#text' => 'Acquia Insight',
+          '#url' => Url::fromUri('https://www.acquia.com/resources/collateral/acquia-insight-data-sheet'),
+        ],
+      ],
+      'profiler' => [
+        '#title' => t('Profilers'),
+        '#description' => t('Use profilers like XHProf or Blackfire.'),
+        'xhprof' => [
+          '#text' => 'XHProf Drupal.org documentation',
+          '#url' => Url::fromUri('https://www.drupal.org/docs/develop/development-tools/xhprof-code-profiler'),
+        ],
+        'blackfire' => [
+          '#text' => 'Blackfire.io',
+          '#url' => Url::fromUri('https://blackfire.io/'),
+        ],
+      ],
     ],
     'test' => [
       '#title' => t('Testing'),
-      '#description' => t('Test coverage with BDD (Behat), PHPUnit, ...'),
+      '#description' => '<h2>' . t('Various test coverages') . '</h2>',
       'manual_test' => [
         '#title' => t('Manual test'),
-        '#description' => t('Test the website for each role, anonymous included. Test with caches enabled. Use Masquerade to substitute as other users.'),
-        'masquerade' => [
-          '#text' => t('Masquerade module'),
-          '#url' => Url::fromUri(t('https://drupal.org/project/masquerade')),
-        ],
+        '#description' => t('Test the website for each role, anonymous included. Test with caches enabled. Use @masquerade_link to substitute as other users.', [
+          '@masquerade_link' => $productionChecklist->getProjectLink('masquerade'),
+        ]),
       ],
       'behat' => [
-        '#title' => t('Run Behat tests'),
-        '#description' => t('@todo'),
-        '#text' => t('Behat'),
-        '#url' => Url::fromUri(t('http://behat-drupal-extension.readthedocs.io/en/3.1/intro.html')),
+        '#title' => t('Behat tests'),
+        '#description' => t('BDD tests with Behat. Fast and affordable.'),
+        'path' => [
+          '#text' => t('Behat'),
+          '#url' => Url::fromUri(t('http://behat-drupal-extension.readthedocs.io/en/3.1/intro.html')),
+        ],
       ],
       'php_unit' => [
         '#title' => t('Run PHPUnit tests'),
-        '#description' => t('@todo'),
+        '#description' => t('Use them before a deployment: Functional, Kernel, Javascript, ...'),
         '#text' => t('PHP Unit'),
         '#url' => Url::fromUri(t('https://www.drupal.org/docs/8/phpunit')),
+      ],
+      'ci' => [
+        '#title' => t('Continuous Integration system'),
+        '#description' => t('Use tools that fits your needs like Travis CI, CircleCI, Jenkins.'),
+        'travis_ci' => [
+          '#text' => t('Travis CI'),
+          '#url' => Url::fromUri(t('https://travis-ci.org/')),
+        ],
+        'circle_ci' => [
+          '#text' => t('CircleCI'),
+          '#url' => Url::fromUri(t('https://circleci.com/')),
+        ],
+        'jenkins' => [
+          '#text' => t('Jenkins'),
+          '#url' => Url::fromUri(t('https://jenkins.io/')),
+        ],
       ],
     ],
     'analytics' => [
       '#title' => t('Analytics'),
-      '#description' => t('External tools to measure audience.'),
+      '#description' => '<h2>' . t('Analytics') . '</h2>',
       'google_analyics' => [
         '#title' => t('Google Analytics'),
-        '#description' => t('Is Google Analytics installed and configured?'),
-        '#text' => t('Google Analytics module'),
-        '#url' => Url::fromUri('https://www.drupal.org/project/google_analytics'),
+        '#description' => t('Is the @ga_link module installed and configured?', [
+          '@ga_link' => $productionChecklist->getProjectLink('google_analytics'),
+        ]),
       ],
       'google_webmaster_tools' => [
         '#title' => t('Google webmaster tools'),
@@ -366,7 +438,7 @@ function production_checklist_checklistapi_checklist_info() {
       ],
       'heatmap' => [
         '#title' => t('Heatmap'),
-        '#description' => t('Is Hotjar or another heatmap installed and configured?'),
+        '#description' => t('Is Hotjar or another heatmap service installed and configured?'),
         'hotjar' => [
           '#text' => t('Hotjar'),
           '#url' => Url::fromUri('https://www.hotjar.com/'),
@@ -376,14 +448,20 @@ function production_checklist_checklistapi_checklist_info() {
     // Sysadmin check.
     'sysadmin' => [
       '#title' => t('Sysadmin and backups'),
-      '#description' => t('Server configuration and backups'),
+      '#description' => '<h2>' . t('Server configuration and backups') . '</h2>',
       'backup' => [
         '#title' => t('Backups'),
-        '#description' => t('Make sure that you have database and files backups enabled. Use a module like Backup and Migrate with Nodesquirell.'),
+        '#description' => t('Make sure that you have database and files backups enabled. Use a module like @bam_link with NodeSquirrel.', [
+          '@bam_link' => $productionChecklist->getProjectLink('backup_migrate'),
+        ]),
+        'nodesquirrel' => [
+          '#text' => 'NodeSquirrel',
+          '#url' => Url::fromUri('https://www.nodesquirrel.com/'),
+        ],
       ],
       'mail' => [
         '#title' => t('Mails'),
-        '#description' => t('Have mails being tested for each form (e.g. password reset). Is a third party needed? Are SPF and PTR ok?'),
+        '#description' => t('Have mails being tested for each form (e.g. password reset). Is a third party needed, like Mandrill or Sendgrid? Are SPF and PTR ok?'),
       ],
       'ssl' => [
         '#title' => t('SSL certificate'),
@@ -399,20 +477,24 @@ function production_checklist_checklistapi_checklist_info() {
       ],
       'resources' => [
         '#title' => t('Maximum memory and execution time'),
-        '#description' => t("This should be set in your per vhost php.ini configuration if available. Set <code>max_execution_time</code> and <code>memory_limit</code> according to your needs."),
+        '#description' => t("This should be set in your per vhost php.ini configuration if available. Set <code>memory_limit</code> and <code>max_execution_time</code> according to your needs."),
       ],
       'file_permission' => [
         '#title' => t('Check files / directories permissions and ownership'),
-        '#description' => t('Usually one owner per virtual host, files at 644 and directories at 755.'),
+        '#description' => t('Usually one owner and group per virtual host, files at 644 and directories at 755.'),
       ],
       'cron_job' => [
         '#title' => t('Check cron jobs'),
         '#description' => t('Modules like Scheduler should work properly. If you have custom cron jobs, check if your system cron is executed on startup and configured properly for your user.'),
         // @todo check if Automated Cron is enabled
       ],
-      'load' => [
-        '#title' => t('Check server load'),
-        '#description' => t('Will your server support peaks?'),
+      'load_monitor' => [
+        '#title' => t('Monitor your server and check the server load'),
+        '#description' => t('Configure your monitoring, optionally use a service like New Relic. Will your server support peaks?'),
+        'new_relic' => [
+          '#text' => t("New Relic"),
+          '#url' => Url::fromUri('https://newrelic.com/'),
+        ],
       ],
       'reverse_proxy' => [
         '#title' => t('Reverse proxy'),
@@ -422,15 +504,18 @@ function production_checklist_checklistapi_checklist_info() {
     // Basic SEO.
     'seo' => [
       '#title' => t('SEO'),
-      '#description' => t('Basic SEO. For an extended list, use @seo_checklist_link.',
-        ['@seo_checklist_link' => $productionChecklist->getProjectLink('seo_checklist')]),
+      '#description' => '<h2>' . t('Basic SEO') . '</h2><p>' . t('For an extended list, use @seo_checklist_link.',
+        ['@seo_checklist_link' => $productionChecklist->getProjectLink('seo_checklist')]) . '</p>',
       'url_rewriting' => [
         '#title' => t('URL rewriting'),
         '#description' => t('Is URL rewriting enabled and Pathauto configured?'),
       ],
       'not_found' => [
         '#title' => t('Review 404 errors'),
-        '#description' => t('Consider using the Redirect module.'),
+        '#description' => t('Consider using the @redirect_link module.',
+          [
+            '@redirect_link' => $productionChecklist->getProjectLink('redirect'),
+          ]),
         'path' => [
           '#text' => t("Top 'page not found' errors"),
           '#url' => Url::fromUserInput('/admin/reports/page-not-found'),
@@ -438,7 +523,7 @@ function production_checklist_checklistapi_checklist_info() {
       ],
       'htaccess' => [
         '#title' => t('Review your .htaccess'),
-        '#description' => t('There should be a single version of your site, redirect non www prefix to www (or the opposite) and http to https.'),
+        '#description' => t('There should be a single accessible URL for your site, redirect non www prefix to www (or the opposite) and http to https.'),
       ],
       'robots' => [
         '#title' => t('Review your robots.txt'),
@@ -464,10 +549,10 @@ function production_checklist_checklistapi_checklist_info() {
     // Legal.
     'legal' => [
       '#title' => t('Legal'),
-      '#description' => t('Legal aspects'),
+      '#description' => '<h2>' . t('Legal aspects') . '</h2>',
       'cookie_control' => [
         '#title' => t('Cookie compliance with regulations'),
-        '#description' => t('@todo'),
+        '#description' => t('Install a cookie validation module and provide explanation about cookie usage.'),
         'project' => [
           '#text' => t('Cookie control module'),
           '#url' => Url::fromUri('https://www.drupal.org/project/cookiecontrol'),
@@ -475,7 +560,7 @@ function production_checklist_checklistapi_checklist_info() {
       ],
       'conditions' => [
         '#title' => t('Privacy policy and general conditions'),
-        '#description' => t('@todo review commerce use case'),
+        '#description' => t('Provide also extra legal information (delivery, cancellation, ...) for commerce use cases.'),
       ],
       'gdpr' => [
         '#title' => t('GDPR'),
@@ -489,23 +574,43 @@ function production_checklist_checklistapi_checklist_info() {
     // Project documentation.
     'documentation' => [
       '#title' => t('Project documentation'),
-      '#description' => t('@todo'),
+      '#description' => '<h2>' . t('Documentation related to the persona') . '</h2>',
       'author_documentation' => [
         '#title' => t('Author documentation'),
-        '#description' => t('@todo'),
+        '#description' => t('Leave Drupal and custom use cases documentation to the authors, accessible from the Help section.'),
       ],
       'developer_documentation' => [
         '#title' => t('Developer onboarding'),
-        '#description' => t('@todo'),
+        '#description' => t('Create a developer onboarding documentation at the root of your repo (README), provide wiki and UML diagrams.'),
       ],
     ],
-    // Go deeper with specialized modules or services
-    // use it in the context
-    // - Acquia Insight
-    // - YSlow
-    // - Google page speed
-    // - Profilers (XHProf, Blackfire), monitoring (MRTG, New Relic, ...)
   ];
+
+  // Append translation items to the content section if multilingual applies.
+  if ($productionChecklist->isSiteMultilingual()) {
+    $definitions['production_checklist']['content'] += [
+      'content_translation' => [
+        '#title' => t('Content translation'),
+        '#description' => t('Are all the necessary content translated?'),
+      ],
+      'entity_translation' => [
+        '#title' => t('Entity and field translation'),
+        '#description' => t('Are all the entities and fields configured properly?'),
+        'path' => [
+          '#text' => t('Content language'),
+          '#url' => Url::fromUserInput(t('/admin/config/regional/content-language')),
+        ],
+      ],
+      'localization' => [
+        '#title' => t('Localization'),
+        '#description' => t('Is the localization up to date?'),
+        'path' => [
+          '#text' => t('Available translation updates'),
+          '#url' => Url::fromUserInput(t('/admin/reports/translations')),
+        ],
+      ],
+    ];
+  }
 
   return $definitions;
 }

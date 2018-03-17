@@ -19,6 +19,14 @@ interface ProductionChecklistInterface {
   public function isModuleInstalled($module);
 
   /**
+   * Wrapper for the language manager to check if the site is multilingual.
+   *
+   * @return bool
+   *   Is the site multilingual.
+   */
+  public function isSiteMultilingual();
+
+  /**
    * Returns the link to a project on Drupal.org.
    *
    * @param string $project

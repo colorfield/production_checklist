@@ -62,6 +62,16 @@ class ProductionChecklist implements ProductionChecklistInterface {
   /**
    * {@inheritdoc}
    */
+  public function isSiteMultilingual() {
+    // @todo dependency injection
+    /** @var \Drupal\Core\Language\LanguageManagerInterface $languageManager */
+    $languageManager = \Drupal::service('language_manager');
+    return $languageManager->isMultilingual();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getProjectLink($project) {
     $uri = 'https://drupal.org/project/' . $project;
     $projectName = str_replace('_', ' ', $project);
@@ -69,7 +79,7 @@ class ProductionChecklist implements ProductionChecklistInterface {
     $url = Url::fromUri($uri);
     $link = Link::fromTextAndUrl($projectName, $url);
     $link = $link->toRenderable();
-    return $this->renderer->render($link);
+    return $this->renderer->renderRoot($link);
   }
 
   /**
@@ -87,7 +97,7 @@ class ProductionChecklist implements ProductionChecklistInterface {
       '#link' => $this->getProjectLink($project),
       '#status' => $status,
     ];
-    return $this->renderer->render($build);
+    return $this->renderer->renderRoot($build);
   }
 
   /**
@@ -103,7 +113,7 @@ class ProductionChecklist implements ProductionChecklistInterface {
       '#items' => $items,
       '#type' => 'ul',
     ];
-    return $this->renderer->render($build);
+    return $this->renderer->renderRoot($build);
   }
 
   /**
@@ -118,7 +128,7 @@ class ProductionChecklist implements ProductionChecklistInterface {
    * {@inheritdoc}
    */
   public function getDevelopmentModulesStatusLink() {
-    $projects = ['devel', 'devel_generate', 'webprofiler', 'kint', 'coder'];
+    $projects = ['devel', 'coder'];
     return $this->getProjectsListStatusLink($projects, FALSE);
   }
 
@@ -132,7 +142,7 @@ class ProductionChecklist implements ProductionChecklistInterface {
       $this->moduleHandler->loadInclude('update', 'compare.inc');
       $build['#data'] = update_calculate_project_data($available);
     }
-    return $this->renderer->render($build);
+    return $this->renderer->renderRoot($build);
   }
 
   /**
@@ -142,7 +152,7 @@ class ProductionChecklist implements ProductionChecklistInterface {
     $route = 'system.modules_list';
     $link = Link::createFromRoute(t('Modules'), $route);
     $link = $link->toRenderable();
-    return $this->renderer->render($link);
+    return $this->renderer->renderRoot($link);
   }
 
   /**
