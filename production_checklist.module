@@ -45,8 +45,7 @@ function production_checklist_theme() {
 function production_checklist_checklistapi_checklist_info() {
   // @todo add basic / extended checklist filter
   // @todo add launch / maintenance checklist filter
-  // @todo uncheck and log once status has evolved
-  // @todo check Coder Review, Advagg
+  // @todo notification once a checked item has been invalidated by configuration
   // @todo convert formUserInput into fromRoute
 
   /** @var \Drupal\production_checklist\ProductionChecklistInterface $productionChecklist */
@@ -232,6 +231,10 @@ function production_checklist_checklistapi_checklist_info() {
           '#text' => t('Text formats and editors'),
           '#url' => Url::fromUserInput('/admin/config/content/formats'),
         ],
+      ],
+      'admin_username' => [
+        '#title' => t('Admin user name'),
+        '#description' => t("The user 1 name (or other users that have the administrator role) should not be defined as 'admin' so it will be harder to guess for attackers."),
       ],
       'password' => [
         '#title' => t('Check passwords'),
@@ -508,10 +511,12 @@ function production_checklist_checklistapi_checklist_info() {
         ['@seo_checklist_link' => $productionChecklist->getProjectLink('seo_checklist')]) . '</p>',
       'url_rewriting' => [
         '#title' => t('URL rewriting'),
-        '#description' => t('Is URL rewriting enabled and Pathauto configured?'),
+        '#description' => t('Is URL rewriting enabled and @pathauto_link configured?', [
+          '@pathauto_link' => $productionChecklist->getProjectLink('pathauto'),
+        ]),
       ],
       'not_found' => [
-        '#title' => t('Review 404 errors'),
+        '#title' => t("Review 404 errors and redirect 301 legacy URL's"),
         '#description' => t('Consider using the @redirect_link module.',
           [
             '@redirect_link' => $productionChecklist->getProjectLink('redirect'),
