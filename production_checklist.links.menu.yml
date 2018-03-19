@@ -3,3 +3,11 @@ production_checklist.checklist:
   parent: system.admin_config_development
   route_name: checklistapi.checklists.production_checklist
   description: 'Production Checklist'
+
+# @todo show the settings form once done and provide c2a from checklist
+production_checklist.production_checklist__settings:
+  title: 'Production Checklist settings'
+  route_name: production_checklist.production_checklist__settings
+  description: 'Sections to enable and notification preferences.'
+  parent: production_checklist.checklist
+  weight: 99

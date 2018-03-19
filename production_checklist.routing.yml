@@ -4,6 +4,16 @@ production_checklist.admin_config:
     _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
     _title: 'Production Checklist'
   requirements:
-    _permission: 'administer site configuration'
+    _permission: 'administer site configuration' # @todo review permission
+  options:
+    _admin_route: TRUE
+
+production_checklist.production_checklist__settings:
+  path: '/admin/config/production_checklist/settings'
+  defaults:
+    _form: '\Drupal\production_checklist\Form\SettingsForm'
+    _title: 'Production Checklist settings'
+  requirements:
+    _permission: 'administer site configuration' # @todo review permission
   options:
     _admin_route: TRUE

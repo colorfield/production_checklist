@@ -1,0 +1,14 @@
+# @todo iterate on checklist definition and set defaults
+sections:
+  - system
+  - drupal_codebase
+  - spam_prevention
+  - security_access
+  - content
+  - database
+  - seo
+notification_enable: 1
+notification_user: 1
+notification_preferences:
+  - On site
+  - Email
