@@ -10,5 +10,7 @@
     "issues": "https://www.drupal.org/project/issues/production_checklist",
     "source": "http://cgit.drupalcode.org/production_checklist"
   },
-  "require": { }
+  "require": {
+    "drupal/checklistapi": "~1.7"
+  }
 }
