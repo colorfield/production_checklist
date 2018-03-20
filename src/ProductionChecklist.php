@@ -2,6 +2,7 @@
 
 namespace Drupal\production_checklist;
 
+use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandler;
 use Drupal\Core\Config\ConfigFactory;
@@ -50,6 +51,29 @@ class ProductionChecklist implements ProductionChecklistInterface {
     $this->moduleHandler = $module_handler;
     $this->renderer = $renderer;
     $this->config = $config;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAvailableSections() {
+    return [
+      'drupal_system' => t('System wide status and reports'),
+      'drupal_codebase' => t('Contributed projects review'),
+      'other_codebase' => t('Vendors and custom code'),
+      'spam_prevention' => t('Spam prevention'),
+      'security_access' => t('Security and access'),
+      'content' => t('Content model review and proofreading'),
+      'frontend' => t('Frontend'),
+      'database' => t('Database and configuration'),
+      'performance' => t('Performance and caching'),
+      'test' => t('Testing'),
+      'analytics' => t('Analytics'),
+      'sysadmin' => t('Sysadmin and backups'),
+      'seo' => t('Basic SEO'),
+      'legal' => t('Legal aspects'),
+      'documentation' => t('Project documentation'),
+    ];
   }
 
   /**
@@ -135,7 +159,7 @@ class ProductionChecklist implements ProductionChecklistInterface {
   /**
    * {@inheritdoc}
    */
-  public function availableUpdates($type = 'security') {
+  public function getAvailableUpdates($type = 'security') {
     $build = [];
     if ($this->isModuleInstalled('update')) {
       $available = update_get_available(TRUE);
@@ -143,6 +167,51 @@ class ProductionChecklist implements ProductionChecklistInterface {
       $build['#data'] = update_calculate_project_data($available);
     }
     return $this->renderer->renderRoot($build);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAvailableSecurityUpdatesAmount() {
+    $result = 0;
+    // @todo implement
+    // $updates = $this->getAvailableUpdates('security');
+    return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSecurityUpdatesChecklistArray() {
+    $description = '';
+    $pathText = '';
+    $pathUrl = NULL;
+    // @todo implement
+    // if ($this->getAvailableSecurityUpdatesAmount() === 0) {
+    // $description .= t('On last check,
+    // no security updates were available.');
+    // $pathText = t('Manual check');
+    // $pathUrl = Url::fromRoute('update.manual_status');
+    // }
+    // else {
+    // $description .= t('There are at least @amount security
+    // updates available,
+    // check @manual_status_link to get a complete status.');
+    // $pathText = t('Available updates');
+    // $pathUrl = Url::fromUserInput('update.status');
+    // }
+    $description .= t('Check available updates.');
+    $pathText = t('Available updates');
+    // @todo route
+    $pathUrl = Url::fromRoute('update.status');
+    return [
+      '#title' => t('Drupal and other projects update'),
+      '#description' => $description,
+      'path' => [
+        '#text' => $pathText,
+        '#url' => $pathUrl,
+      ],
+    ];
   }
 
   /**
@@ -173,6 +242,32 @@ class ProductionChecklist implements ProductionChecklistInterface {
       '#text' => t('Uninstall modules'),
       '#url' => Url::fromRoute('system.modules_uninstall'),
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFieldsFromType($type) {
+    $fields = [];
+    try {
+      $fields = $this->entityTypeManager->getStorage('field_storage_config')
+        ->loadByProperties(['type' => 'email']);
+    }
+    catch (InvalidPluginDefinitionException $exception) {
+      // @todo use messenger (available >= 8.5.0)
+      drupal_set_message($exception->getMessage(), 'error');
+    }
+    return $fields;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEmailObfuscationDescription() {
+    $output = '';
+    $output .= t('Are the email addresses protected against bots harvesting? Email addresses can be present in fields, WYSIWYG, Twig.');
+    $fields = $this->getFieldsFromType('email');
+    return $output;
   }
 
 }

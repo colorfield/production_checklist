@@ -66,29 +66,13 @@ class SettingsForm extends ConfigFormBase {
     if ($config->get('notification_user') !== NULL) {
       $user = $this->entityTypeManager->getStorage('user')->load((int) $config->get('notification_user'));
     }
-    drupal_set_message('This form is currently under development and does not have any effect yet on the checklist.', 'warning');
+    drupal_set_message('The settings form is currently under development, notifications does not have any effect yet.', 'warning');
     $form['sections'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Sections to enable'),
       '#description' => $this->t('Sections that will be part of your production checklist'),
       // @todo generate options from checklist definition
-      '#options' => [
-        'drupal_system' => $this->t('System wide status and reports'),
-        'drupal_codebase' => $this->t('Contributed projects review'),
-        'other_codebase' => $this->t('Vendors and custom code'),
-        'spam_prevention' => $this->t('Spam prevention'),
-        'security_access' => $this->t('Security and access'),
-        'content' => $this->t('Content model review and proofreading'),
-        'frontend' => $this->t('Frontend'),
-        'database' => $this->t('Database and configuration'),
-        'performance' => $this->t('Performance and caching'),
-        'test' => $this->t('Testing'),
-        'analytics' => $this->t('Analytics'),
-        'sysadmin' => $this->t('Sysadmin and backups'),
-        'seo' => $this->t('Basic SEO'),
-        'legal' => $this->t('Legal aspects'),
-        'documentation' => $this->t('Project documentation'),
-      ],
+      '#options' => \Drupal::service('production_checklist')->getAvailableSections(),
       '#default_value' => $config->get('sections'),
     ];
     $form['notification'] = [
@@ -121,7 +105,7 @@ class SettingsForm extends ConfigFormBase {
     $form['notification']['notification_preferences'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Notification preferences'),
-      '#options' => ['On site' => $this->t('On site'), 'Email' => $this->t('Email')],
+      '#options' => ['on_site' => $this->t('On site'), 'email' => $this->t('Email')],
       '#default_value' => $config->get('notification_preferences'),
       '#states' => [
         'invisible' => [

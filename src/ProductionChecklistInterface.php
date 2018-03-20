@@ -8,6 +8,14 @@ namespace Drupal\production_checklist;
 interface ProductionChecklistInterface {
 
   /**
+   * Returns a list of a the sections used for the checklist definition.
+   *
+   * @return array
+   *   List of available sections.
+   */
+  public function getAvailableSections();
+
+  /**
    * Wrapper for the module handler to check if a module is installed.
    *
    * @param string $module
@@ -88,7 +96,23 @@ interface ProductionChecklistInterface {
    * @return string
    *   Available updates summary.
    */
-  public function availableUpdates($type = 'security');
+  public function getAvailableUpdates($type = 'security');
+
+  /**
+   * Returns the amount of security updates that needs to be applied.
+   *
+   * @return int
+   *   Amount of security updates.
+   */
+  public function getAvailableSecurityUpdatesAmount();
+
+  /**
+   * Returns the description and links depending on available security updates.
+   *
+   * @return array
+   *   The security update checklist array.
+   */
+  public function getSecurityUpdatesChecklistArray();
 
   /**
    * Returns the module page link.
@@ -113,5 +137,24 @@ interface ProductionChecklistInterface {
    *   Text and url array keys.
    */
   public function getModulesUninstallPageTextUrl();
+
+  /**
+   * Returns a list of fields for a type.
+   *
+   * @param string $type
+   *   The field type.
+   *
+   * @return array|\Drupal\Core\Entity\EntityInterface[]
+   *   List of field configuration entities.
+   */
+  public function getFieldsFromType($type);
+
+  /**
+   * Returns the description for email obfuscation of fields and modules.
+   *
+   * @return string
+   *   The email obfuscation description.
+   */
+  public function getEmailObfuscationDescription();
 
 }
