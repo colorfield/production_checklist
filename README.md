@@ -22,6 +22,14 @@ Sections covered by this checklist:
 - Legal aspects
 - Project documentation
 
+## Installation
+
+`composer require drupal/production_checklist`
+
+Start ticking via _Configuration > Development > Production Checklist_
+
+Optionally add or remove sections.
+
 ## Roadmap
 
 Features to be implemented in forthcoming releases.
@@ -33,6 +41,6 @@ Due to the amount of items to check, filters can provide more context across sec
 - Musth have / nice to have
 - Launch / release / maintenance
 
-### Sections configuration
+### Notification
 
-Each section could be added or removed via configuration (e.g. 'Sysadmin' or 'Legal' could be part of another validation process).
+Be notified once a checked item has been invalidated by configuration (e.g. 'Email obfuscation' has been marked has checked but a new email field has been created and has not been protected against email address harvesting).
