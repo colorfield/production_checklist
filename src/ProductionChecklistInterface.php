@@ -8,12 +8,40 @@ namespace Drupal\production_checklist;
 interface ProductionChecklistInterface {
 
   /**
-   * Returns a list of a the sections used for the checklist definition.
+   * The checklist id.
+   */
+  const CHECKLIST_ID = 'production_checklist';
+
+  /**
+   * Returns a list of a the sections.
+   *
+   * Used for the checklist definition.
    *
    * @return array
    *   List of available sections.
    */
   public function getAvailableSections();
+
+  /**
+   * Returns a list of a the items grouped by sections.
+   *
+   * Used for the checklist definition.
+   *
+   * @return array
+   *   List of available items by section..
+   */
+  public function getAvailableSectionsItems();
+
+  /**
+   * Clears the items from the sections to remove from configuration.
+   *
+   * @param array $sections
+   *   List of sections that contains items to remove.
+   *
+   * @return int
+   *   Amount of items that have been cleared.
+   */
+  public function clearItems(array $sections);
 
   /**
    * Wrapper for the module handler to check if a module is installed.
