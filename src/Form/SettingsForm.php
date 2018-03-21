@@ -138,6 +138,10 @@ class SettingsForm extends ConfigFormBase {
       ->set('notification_user', $form_state->getValue('notification_user'))
       ->set('notification_preferences', $form_state->getValue('notification_preferences'))
       ->save();
+
+    /** @var ProductionChecklistInterface $productionChecklist */
+    $productionChecklist = \Drupal::service('production_checklist');
+    $productionChecklist->clearItems($form_state->getValue('sections'));
   }
 
 }

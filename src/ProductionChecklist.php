@@ -661,19 +661,23 @@ class ProductionChecklist implements ProductionChecklistInterface {
     $checklistConfig = $this->config->getEditable('checklistapi.progress.' . ProductionChecklistInterface::CHECKLIST_ID);
     $savedProgress = $checklistConfig->get(ChecklistapiChecklist::PROGRESS_CONFIG_KEY);
     $deletedItems = 0;
-    // @todo implement.
-    foreach ($this->getAvailableSectionsItems() as $sectionItems) {
-      foreach ($sectionItems as $itemKey => $itemValue) {
-        if (array_key_exists($itemKey, $savedProgress['#items'])) {
-          // drupal_set_message('Item deleted ' . $itemKey);.
-          unset($savedProgress['#items'][$itemKey]);
-          ++$deletedItems;
+    if (isset($savedProgress['#items'])) {
+      foreach ($this->getAvailableSectionsItems() as $sectionKey => $sectionItems) {
+        if (in_array($sectionKey, $sections) && $sections[$sectionKey] === 0) {
+          foreach ($sectionItems as $itemKey => $itemValue) {
+            if (array_key_exists($itemKey, $savedProgress['#items'])) {
+              // @todo use messenger
+              drupal_set_message(t('Clearing item: @item', ['@item' => $itemValue['#title']]));
+              unset($savedProgress['#items'][$itemKey]);
+              ++$deletedItems;
+            }
+          }
         }
       }
+      $savedProgress['#completed_items'] -= $deletedItems;
+      $checklistConfig->set(ChecklistapiChecklist::PROGRESS_CONFIG_KEY, $savedProgress);
+      $checklistConfig->save();
     }
-    // @todo check status.
-    // $checklistConfig->set(
-    // ChecklistapiChecklist::PROGRESS_CONFIG_KEY, $savedProgress);
     return $deletedItems;
   }
 

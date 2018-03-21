@@ -90,20 +90,12 @@ function production_checklist_checklistapi_checklist_info_alter(array &$definiti
 
   // Remove sections that are unset from the configuration.
   $configuredSections = $config->get('sections');
-  $sectionsToClear = [];
   foreach ($definitions[ProductionChecklistInterface::CHECKLIST_ID] as $sectionKey => $sectionTitle) {
     if (!array_key_exists($sectionKey, $productionChecklist->getAvailableSections())
       || $configuredSections[$sectionKey] === 0) {
       if (strpos($sectionKey, '#') === FALSE) {
         unset($definitions[ProductionChecklistInterface::CHECKLIST_ID][$sectionKey]);
-        $sectionsToClear[] = $sectionKey;
       }
     }
-  }
-  if (!empty($sectionsToClear)) {
-    $deletedItems = $productionChecklist->clearItems($sectionsToClear);
-    // @todo messenger
-    // drupal_set_message(t('@amount items to be deleted.',
-    // ['@amount' => $deletedItems,]), 'warning');
   }
 }

@@ -33,10 +33,10 @@ interface ProductionChecklistInterface {
   public function getAvailableSectionsItems();
 
   /**
-   * Clears the items from the sections to remove from configuration.
+   * Clears the items from the sections.
    *
    * @param array $sections
-   *   List of sections that contains items to remove.
+   *   List of sections that contains items.
    *
    * @return int
    *   Amount of items that have been cleared.
