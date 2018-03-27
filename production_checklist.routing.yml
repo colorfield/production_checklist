@@ -8,7 +8,7 @@ production_checklist.admin_config:
   options:
     _admin_route: TRUE
 
-production_checklist.production_checklist__settings:
+production_checklist.settings:
   path: '/admin/config/production_checklist/settings'
   defaults:
     _form: '\Drupal\production_checklist\Form\SettingsForm'

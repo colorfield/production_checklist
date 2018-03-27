@@ -46,21 +46,12 @@ function production_checklist_theme() {
  */
 function production_checklist_checklistapi_checklist_info() {
   $definitions = [];
-  /** @var \Drupal\Core\Render\Renderer $renderer */
-  $renderer = \Drupal::service('renderer');
   // Set checklist basic definition.
-  $configurationUrl = Url::fromRoute('production_checklist.production_checklist__settings',
-    [], ['query' => ['destination' => '/admin/config/production_checklist/checklist']]);
-  $configurationLink = Link::fromTextAndUrl(t('Configure available sections'), $configurationUrl);
-  $configurationLink = $configurationLink->toRenderable();
-  $configurationLink = $renderer->renderRoot($configurationLink);
   $definitions[ProductionChecklistInterface::CHECKLIST_ID] = [
     '#title' => t('Production Checklist'),
     '#path' => 'admin/config/production_checklist/checklist',
     '#callback' => 'production_checklist_checklistapi_checklist_items',
     '#description' => t('Production environment checklist. Happiness is in ticking boxes.'),
-    '#help' => '<p>' . t('A checklist for site launch and maintenance based on the active configuration. @config_link.',
-        ['@config_link' => $configurationLink]) . '</p>',
   ];
   return $definitions;
 }
@@ -83,6 +74,19 @@ function production_checklist_checklistapi_checklist_items() {
  * Implements hook_checklistapi_checklist_info_alter().
  */
 function production_checklist_checklistapi_checklist_info_alter(array &$definitions) {
+  /** @var \Drupal\Core\Render\Renderer $renderer */
+  $renderer = \Drupal::service('renderer');
+
+  // Set configuration url in info_alter, once the route is available.
+  $configurationUrl = Url::fromRoute('production_checklist.settings',
+    [], ['query' => ['destination' => '/admin/config/production_checklist/checklist']]);
+  $configurationLink = Link::fromTextAndUrl(t('Configure available sections'), $configurationUrl);
+  $configurationLink = $configurationLink->toRenderable();
+  $configurationLink = $renderer->renderRoot($configurationLink);
+  $definitions[ProductionChecklistInterface::CHECKLIST_ID]['#help'] = '<p>'
+    . t('A checklist for site launch and maintenance based on the active configuration. @config_link.',
+    ['@config_link' => $configurationLink]) . '</p>';
+
   /** @var \Drupal\production_checklist\ProductionChecklistInterface $productionChecklist */
   $productionChecklist = \Drupal::service('production_checklist');
   /** @var \Drupal\Core\Config\ImmutableConfig $config */
@@ -92,7 +96,7 @@ function production_checklist_checklistapi_checklist_info_alter(array &$definiti
   $configuredSections = $config->get('sections');
   foreach ($definitions[ProductionChecklistInterface::CHECKLIST_ID] as $sectionKey => $sectionTitle) {
     if (!array_key_exists($sectionKey, $productionChecklist->getAvailableSections())
-      || $configuredSections[$sectionKey] === 0) {
+      || (isset($configuredSections[$sectionKey]) &&  $configuredSections[$sectionKey] === 0)) {
       if (strpos($sectionKey, '#') === FALSE) {
         unset($definitions[ProductionChecklistInterface::CHECKLIST_ID][$sectionKey]);
       }
