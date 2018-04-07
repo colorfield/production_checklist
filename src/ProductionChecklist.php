@@ -163,7 +163,7 @@ class ProductionChecklist implements ProductionChecklistInterface {
       '#title' => t('Other code base'),
       '#description' => '<h2>' . t("Vendors, custom code and libraries") . '</h2>',
       'development_vendors' => [
-        '#title' => t('Remove development vendors like PHPUnit, Behat.'),
+        '#title' => t('Remove development vendors like PHPUnit, Behat'),
         '#description' => t('Run <code>composer install --no-dev</code>'),
         'documentation' => [
           '#text' => t('Composer install documentation'),
@@ -171,8 +171,8 @@ class ProductionChecklist implements ProductionChecklistInterface {
         ],
       ],
       'custom_libraries' => [
-        '#title' => t('Remove unused libraries.'),
-        '#description' => t('Check the /libraries directory'),
+        '#title' => t('Remove unused libraries'),
+        '#description' => t('Check the /libraries directory.'),
       ],
       'node_modules' => [
         '#title' => t('Node modules'),
