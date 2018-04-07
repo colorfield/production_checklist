@@ -28,9 +28,17 @@ interface ProductionChecklistInterface {
    * Used for the checklist definition.
    *
    * @return array
-   *   List of available items by section..
+   *   List of available items by section.
    */
   public function getAvailableSectionsItems();
+
+  /**
+   * Returns a list of section titles from a list of section keys.
+   *
+   * @return array
+   *   List of section titles.
+   */
+  public function getSectionTitles(array $sections);
 
   /**
    * Clears the items from the sections.
@@ -38,8 +46,8 @@ interface ProductionChecklistInterface {
    * @param array $sections
    *   List of sections that contains items.
    *
-   * @return int
-   *   Amount of items that have been cleared.
+   * @return array
+   *   List of items that have been cleared.
    */
   public function clearItems(array $sections);
 

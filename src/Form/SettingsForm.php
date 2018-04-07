@@ -67,14 +67,6 @@ class SettingsForm extends ConfigFormBase {
       $user = $this->entityTypeManager->getStorage('user')->load((int) $config->get('notification_user'));
     }
     drupal_set_message('The settings form is currently under development, notifications does not have any effect yet.', 'warning');
-    $form['sections'] = [
-      '#type' => 'checkboxes',
-      '#title' => $this->t('Sections to enable'),
-      '#description' => $this->t('Sections that will be part of your production checklist'),
-      // @todo generate options from checklist definition
-      '#options' => \Drupal::service('production_checklist')->getAvailableSections(),
-      '#default_value' => $config->get('sections'),
-    ];
     $form['notification'] = [
       '#type' => 'fieldset',
       '#title' => t('Notification'),
@@ -126,15 +118,10 @@ class SettingsForm extends ConfigFormBase {
     parent::submitForm($form, $form_state);
 
     $this->config('production_checklist.settings')
-      ->set('sections', $form_state->getValue('sections'))
       ->set('notification_enable', $form_state->getValue('notification_enable'))
       ->set('notification_user', $form_state->getValue('notification_user'))
       ->set('notification_preferences', $form_state->getValue('notification_preferences'))
       ->save();
-
-    /** @var ProductionChecklistInterface $productionChecklist */
-    $productionChecklist = \Drupal::service('production_checklist');
-    $productionChecklist->clearItems($form_state->getValue('sections'));
   }
 
 }

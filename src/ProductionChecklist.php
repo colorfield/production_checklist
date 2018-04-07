@@ -657,24 +657,37 @@ class ProductionChecklist implements ProductionChecklistInterface {
   /**
    * {@inheritdoc}
    */
+  public function getSectionTitles(array $sections) {
+    $result = [];
+    foreach ($this->getAvailableSections() as $sectionKey => $sectionTitle) {
+      if (in_array($sectionKey, $sections)) {
+        $result[] = $sectionTitle;
+      }
+    }
+    return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function clearItems(array $sections) {
     $checklistConfig = $this->config->getEditable('checklistapi.progress.' . ProductionChecklistInterface::CHECKLIST_ID);
     $savedProgress = $checklistConfig->get(ChecklistapiChecklist::PROGRESS_CONFIG_KEY);
-    $deletedItems = 0;
+    $deletedItems = [];
+    $amountItemsDeleted = 0;
     if (isset($savedProgress['#items'])) {
       foreach ($this->getAvailableSectionsItems() as $sectionKey => $sectionItems) {
         if (in_array($sectionKey, $sections) && $sections[$sectionKey] === 0) {
           foreach ($sectionItems as $itemKey => $itemValue) {
             if (array_key_exists($itemKey, $savedProgress['#items'])) {
-              // @todo use messenger
-              drupal_set_message(t('Clearing item: @item', ['@item' => $itemValue['#title']]));
+              $deletedItems[] = $itemValue['#title'];
               unset($savedProgress['#items'][$itemKey]);
-              ++$deletedItems;
+              ++$amountItemsDeleted;
             }
           }
         }
       }
-      $savedProgress['#completed_items'] -= $deletedItems;
+      $savedProgress['#completed_items'] -= $amountItemsDeleted;
       $checklistConfig->set(ChecklistapiChecklist::PROGRESS_CONFIG_KEY, $savedProgress);
       $checklistConfig->save();
     }

@@ -77,9 +77,8 @@ function production_checklist_checklistapi_checklist_info_alter(array &$definiti
   /** @var \Drupal\Core\Render\Renderer $renderer */
   $renderer = \Drupal::service('renderer');
 
-  // Set configuration url in info_alter, once the route is available.
-  $configurationUrl = Url::fromRoute('production_checklist.settings',
-    [], ['query' => ['destination' => '/admin/config/production_checklist/checklist']]);
+  // Set configuration Url in info_alter, once the route is available.
+  $configurationUrl = Url::fromRoute('production_checklist.sections');
   $configurationLink = Link::fromTextAndUrl(t('Configure available sections'), $configurationUrl);
   $configurationLink = $configurationLink->toRenderable();
   $configurationLink = $renderer->renderRoot($configurationLink);
