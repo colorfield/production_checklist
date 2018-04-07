@@ -138,7 +138,7 @@ class ProductionChecklist implements ProductionChecklistInterface {
       '#title' => t('Drupal code base'),
       '#description' => '<h2>' . t('Contributed projects review') . '</h2><p>' . t('Core, modules and themes.') . '</p>',
       'development_modules' => [
-        '#title' => t('Uninstall development modules like Devel (Devel, Devel generate, Kint, Webprofiler).'),
+        '#title' => t('Uninstall development modules like Devel (Devel, Devel generate, Kint, Webprofiler)'),
         // @todo check modules status
         '#description' => $this->getDevelopmentModulesStatusLink(),
         'path' => $this->getModulesUninstallPageTextUrl(),

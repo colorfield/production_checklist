@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Url;
+use Drupal\production_checklist\ProductionChecklistInterface;
 
 /**
  * Implements hook_requirements().
@@ -31,4 +32,31 @@ function production_checklist_requirements($phase) {
   }
 
   return $requirements;
+}
+
+/**
+ * Implements hook_install().
+ */
+function production_checklist_install() {
+  $config = \Drupal::configFactory()->getEditable('production_checklist.settings');
+  $sections = $config->get('sections');
+  // Fix key - value structure.
+  // If the array has numeric keys, replace them by string keys.
+  // @todo review config.install
+  if (!count(array_filter(array_keys($sections), 'is_string')) > 0) {
+    $newSections = [];
+    foreach ($sections as $key => $value) {
+      $newSections[$value] = $value;
+    }
+    $config->set('sections', $newSections)->save();
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function production_checklist_uninstall() {
+  \Drupal::configFactory()
+    ->getEditable('checklistapi.progress.' . ProductionChecklistInterface::CHECKLIST_ID)
+    ->delete();
 }

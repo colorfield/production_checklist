@@ -2,9 +2,11 @@
 
 namespace Drupal\production_checklist\Form;
 
+use Drupal\checklistapi\ChecklistapiChecklist;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\production_checklist\ProductionChecklistInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -51,13 +53,14 @@ class SectionsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('production_checklist.settings');
+    $sections = $config->get('sections');
     $form['sections'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Sections to enable'),
       '#description' => $this->t('Sections that will be part of your production checklist. Disabling sections will clear previously checked items.'),
       // @todo generate options from checklist definition
       '#options' => \Drupal::service('production_checklist')->getAvailableSections(),
-      '#default_value' => $config->get('sections'),
+      '#default_value' => $sections,
     ];
     return parent::buildForm($form, $form_state);
   }
@@ -79,12 +82,16 @@ class SectionsForm extends ConfigFormBase {
     $newActiveSections = array_filter($newSections, function ($value) {
       return $value !== 0;
     });
-    $sectionsToRemove = array_diff_key($currentActiveSections, $newActiveSections);
-    // @todo check if there are checked items for the sections to be removed.
-    // if (count($sectionsToRemove) > 0) {
-    if (count($currentActiveSections) > count($newActiveSections)) {
-      $sections = implode(',', $sectionsToRemove);
-      $form_state->setRedirect('production_checklist.sections.confirm', ['sections' => $sections]);
+    $sectionsDiff = array_diff_key($currentActiveSections, $newActiveSections);
+    // Check if there are saved items first.
+    $checklistConfig = $this->config('checklistapi.progress.' . ProductionChecklistInterface::CHECKLIST_ID);
+    $savedProgress = $checklistConfig->get(ChecklistapiChecklist::PROGRESS_CONFIG_KEY);
+    if (isset($savedProgress['#items'])
+      // @todo $sectionsDiff > 0
+      && count($currentActiveSections) > count($newActiveSections)) {
+      $sectionsToRemove = implode(',', $sectionsDiff);
+      // @todo check if there are checked items for the sections to be removed.
+      $form_state->setRedirect('production_checklist.sections.confirm', ['sections' => $sectionsToRemove]);
     }
     else {
       parent::submitForm($form, $form_state);
