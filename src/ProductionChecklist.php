@@ -512,13 +512,15 @@ class ProductionChecklist implements ProductionChecklistInterface {
       '#description' => '<h2>' . t('Server configuration and backups') . '</h2>',
       'backup' => [
         '#title' => t('Backups'),
-        '#description' => t('Make sure that you have database and files backups enabled. Use a module like @bam_link with NodeSquirrel.', [
+        '#description' => t('Make sure that you have database and files backups enabled. Use a module like @bam_link.', [
           '@bam_link' => $this->getProjectLink('backup_migrate'),
         ]),
-        'nodesquirrel' => [
-          '#text' => 'NodeSquirrel',
-          '#url' => Url::fromUri('https://www.nodesquirrel.com/'),
-        ],
+        // @todo review NodeSquirell status with backup and migrate
+        // https://www.drupal.org/project/backup_migrate/issues/2845676
+        // 'nodesquirrel' => [
+        // '#text' => 'NodeSquirrel',
+        // '#url' => Url::fromUri('https://www.nodesquirrel.com/'),
+        // ],
       ],
       'mail' => [
         '#title' => t('Mails'),
@@ -532,6 +534,7 @@ class ProductionChecklist implements ProductionChecklistInterface {
           '#url' => Url::fromUri('https://letsencrypt.org/'),
         ],
       ],
+      // @todo check max upload size for the current environment.
       'max_upload' => [
         '#title' => t('Maximum file upload size'),
         '#description' => t("This should be set in your per vhost php.ini configuration if available. Set <code>post_max_size</code> and <code>upload_max_filesize</code> according to your needs."),
@@ -595,7 +598,7 @@ class ProductionChecklist implements ProductionChecklistInterface {
       ],
       'sitemap' => [
         '#title' => t('Sitemap'),
-        '#description' => t('Configure your sitemap.xml with a modules like Simple Sitemap.'),
+        '#description' => t('Configure your sitemap.xml with a module like Simple Sitemap.'),
         'simple_sitemap' => [
           '#text' => t('Simple Sitemap module'),
           '#url' => Url::fromUri('https://drupal.org/project/simple_sitemap'),
@@ -884,7 +887,8 @@ class ProductionChecklist implements ProductionChecklistInterface {
   public function getEmailObfuscationDescription() {
     $output = '';
     $output .= t('Are the email addresses protected against bots harvesting? Email addresses can be present in fields, WYSIWYG, Twig.');
-    $fields = $this->getFieldsFromType('email');
+    // @todo get email fields then report usage and review formatter.
+    // $fields = $this->getFieldsFromType('email');
     return $output;
   }
 
