@@ -628,8 +628,8 @@ class ProductionChecklist implements ProductionChecklistInterface {
         '#description' => t('Provide also extra legal information (delivery, cancellation, ...) for commerce use cases.'),
       ],
       'gdpr' => [
-        '#title' => t('GDPR'),
-        '#description' => t('Check compliance with the General Data Protection Regulation.'),
+        '#title' => t('General Data Protection Regulation'),
+        '#description' => t("Regularly check this site's compliance with the upcoming changes to the European privacy regulations (GDPR) and continuously adjust your organization's internal data handling processes regarding the new specifications."),
         'project' => [
           '#text' => t('GDPR module'),
           '#url' => Url::fromUri('https://drupal.org/project/gdpr'),
