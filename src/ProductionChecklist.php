@@ -314,6 +314,14 @@ class ProductionChecklist implements ProductionChecklistInterface {
         '#title' => t('Files sub directories'),
         '#description' => t('Configure file and media fields for storing files in sub directories instead of the <em>sites/default/files</em> root.'),
       ],
+      'date_format' => [
+        '#title' => t('Date formats, locale and timezone'),
+        '#description' => t('Check if these settings are configured to match your site regions.'),
+        'path' => [
+          '#text' => t('Regional and language'),
+          '#url' => Url::fromUserInput(t('/admin/config/regional')),
+        ],
+      ],
     ];
 
     // Append translation items to the content section if multilingual applies.
