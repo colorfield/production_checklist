@@ -812,35 +812,23 @@ class ProductionChecklist implements ProductionChecklistInterface {
    * {@inheritdoc}
    */
   public function getSecurityUpdatesChecklistArray() {
-    $description = '';
-    $pathText = '';
-    $pathUrl = NULL;
-    // @todo implement
-    // if ($this->getAvailableSecurityUpdatesAmount() === 0) {
-    // $description .= t('On last check,
-    // no security updates were available.');
-    // $pathText = t('Manual check');
-    // $pathUrl = Url::fromRoute('update.manual_status');
-    // }
-    // else {
-    // $description .= t('There are at least @amount security
-    // updates available,
-    // check @manual_status_link to get a complete status.');
-    // $pathText = t('Available updates');
-    // $pathUrl = Url::fromUserInput('update.status');
-    // }
-    $description .= t('Check available updates.');
-    $pathText = t('Available updates');
-    // @todo route
-    $pathUrl = Url::fromRoute('update.status');
-    return [
-      '#title' => t('Drupal and other projects update'),
-      '#description' => $description,
-      'path' => [
-        '#text' => $pathText,
-        '#url' => $pathUrl,
-      ],
-    ];
+    if ($this->isModuleInstalled('update')) {
+      return [
+        '#title' => t('Drupal core and contributed projects update'),
+        '#description' => t('Check available updates.'),
+        'path' => [
+          '#text' => t('Available updates'),
+          '#url' => Url::fromRoute('update.status'),
+        ],
+      ];
+    }
+    else {
+      return [
+        '#title' => t('Drupal core and contributed projects update'),
+        '#description' => t('Install the Update Manager module to be notified about projects update.'),
+        'path' => $this->getModulesPageTextUrl(),
+      ];
+    }
   }
 
   /**
